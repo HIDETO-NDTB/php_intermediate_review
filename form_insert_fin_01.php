@@ -9,6 +9,9 @@ ob_start();
 // セッションの開始
 session_start();
 
+// common_function.phpの読み込み
+require_once "common_function.php";
+
 // ユーザー入力情報を保持する配列を準備する
 $user_input_data = [];
 
@@ -75,6 +78,14 @@ if (
 
 // 確認
 // var_dump($error_flg);
+
+// CSRFチェック
+if (is_csrf_token() === false) {
+    // CSRFエラーであることを配列に格納
+    $error_detail["error_csrf"] = true;
+    // エラーフラグを立てる
+    $error_flg = true;
+}
 
 // エラーがある場合、入力ページに遷移する
 if ($error_flg === true) {

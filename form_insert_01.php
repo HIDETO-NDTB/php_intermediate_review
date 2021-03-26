@@ -16,6 +16,9 @@ if (isset($_SESSION["output_buffer"]) === true) {
 
 // 二重に出力しないようにセッション内の情報を削除する
 unset($_SESSION["output_buffer"]);
+
+// CSRFトークンの取得
+$csrf_token = create_csrf_token();
 ?>
 
 <!DOCTYPE html>
@@ -31,7 +34,16 @@ unset($_SESSION["output_buffer"]);
 </head>
 
 <body>
+<?php if (
+    isset($view_data["error_csrf"]) &&
+    $view_data["error_csrf"] === true
+): ?>
+  <span class="error">CSRFトークンでエラーが起きました。正しい遷移を5分以内に操作して下さい。<br></span>
+  <?php endif; ?>
   <form action="./form_insert_fin_01.php" method="POST">
+    <input type="hidden" name="csrf_token" value="<?php echo h(
+        $csrf_token
+    ); ?>">
   <?php if (
       isset($view_data["error_must_name"]) &&
       $view_data["error_must_name"] === true
