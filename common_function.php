@@ -16,6 +16,7 @@ function h_digit($d)
 }
 
 // CSRF共通関数
+// ------------------------------
 // tokenの作成とセッションへの設定
 function create_csrf_token()
 {
@@ -75,4 +76,32 @@ function is_csrf_token()
 
     // 全てのチェックOKだったのでtrueを返す
     return true;
+}
+
+// DB用関数
+// ------------------------------
+
+function get_dbh()
+{
+    $user = "root";
+    $pass = "root";
+    $dsn = "mysql:dbname=udemy_php_intermediate;host=localhost;charset=utf8mb4";
+
+    // 接続オプションの設定
+    $opt = [
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ];
+    // 「複文禁止」が可能なら付け足しておく
+    if (defined("PDO::MYSQL_ATTR_MULTI_STATEMENTS")) {
+        $opt[PDO::MYSQL_ATTR_MULTI_STATEMENTS] = false;
+    }
+
+    // 接続
+    try {
+        $dbh = new PDO($dsn, $user, $pass, $opt);
+    } catch (PDOException $e) {
+        echo "システムでエラーが起きました";
+        exit();
+    }
+    return $dbh;
 }
