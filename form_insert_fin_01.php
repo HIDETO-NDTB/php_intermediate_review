@@ -1,5 +1,4 @@
 <?php
-
 /*
  * ユーザーからのform情報取得とDBへのINSERT
  */
@@ -96,5 +95,44 @@ if ($error_flg === true) {
     exit();
 }
 
-// エラーがない場合にOKを出す（後に消す）
-echo "OK";
+// DBハンドルの取得
+$dbh = get_dbh();
+
+// INSERT文の作成と発行
+// ----------------------------
+// プリペアドステートメントの用意
+$sql =
+    "INSERT INTO `test_form`(`name`, post, `address`, birthday, created, updated) VALUES(:name, :post, :address, :birthday, :created, :updated);";
+$pre = $dbh->prepare($sql);
+
+// 値のバインド
+$pre->bindValue(":name", $user_input_data["name"], PDO::PARAM_STR);
+$pre->bindValue(":post", $user_input_data["post"], PDO::PARAM_STR);
+$pre->bindValue(":address", $user_input_data["address"], PDO::PARAM_STR);
+// 誕生日はあらかじめ繋げておく
+$birthday = "{$user_input_data["birthday_yy"]}-{$user_input_data["birthday_mm"]}-{$user_input_data["birthday_dd"]}";
+$pre->bindValue(":birthday", $birthday, PDO::PARAM_STR);
+$pre->bindValue(":created", date("Y-m-d h:i:s"), PDO::PARAM_STR);
+$pre->bindValue(":updated", date("Y-m-d h:i:s"), PDO::PARAM_STR);
+
+// SQLの実行
+$r = $pre->execute();
+
+if ($r === false) {
+    echo "insertシステムでエラーが起きました";
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DB中級講座</title>
+</head>
+<body>
+    新規登録ありがとうございます！
+</body>
+</html>

@@ -44,8 +44,10 @@ function create_csrf_token()
     }
 
     // CSRFトークンは5個まで
-    while (count(@$_SESSION["front"]["csrf_token"]) >= 5) {
-        array_shift($_SESSION["front"]["csrf_token"]);
+    if (isset($_SESSION["front"]["csrf_token"])) {
+        while (count(@$_SESSION["front"]["csrf_token"]) >= 5) {
+            array_shift($_SESSION["front"]["csrf_token"]);
+        }
     }
 
     // セッションに格納
