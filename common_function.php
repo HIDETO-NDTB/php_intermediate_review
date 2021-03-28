@@ -39,7 +39,7 @@ function create_csrf_token()
         // 後でまとめてエラーチェックするので、ここでは未処理
     }
     if ($csrf_token === "") {
-        echo "CSRFトーケンが作成できないので終了します";
+        echo "CSRFトークンが作成できないので終了します";
         exit();
     }
 

@@ -65,6 +65,7 @@ foreach ($int_params as $p) {
     $user_input_data[$p] = (int) $user_input_data[$p];
 }
 if (
+    // chackdate()は月日年の順
     checkdate(
         $user_input_data["birthday_mm"],
         $user_input_data["birthday_dd"],
@@ -90,6 +91,7 @@ if (is_csrf_token() === false) {
 if ($error_flg === true) {
     // エラー情報をセッションに入れる
     $_SESSION["output_buffer"] = $error_detail;
+    // value保持の為に入力情報をセッションに入れる
     $_SESSION["output_buffer"] += $user_input_data;
     header("Location: ./form_insert_01.php");
     exit();
@@ -115,7 +117,7 @@ $pre->bindValue(":birthday", $birthday, PDO::PARAM_STR);
 $pre->bindValue(":created", date("Y-m-d h:i:s"), PDO::PARAM_STR);
 $pre->bindValue(":updated", date("Y-m-d h:i:s"), PDO::PARAM_STR);
 
-// SQLの実行
+// SQLの実行。insertできない場合はfalseが返る
 $r = $pre->execute();
 
 if ($r === false) {
