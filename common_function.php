@@ -112,6 +112,29 @@ function get_dbh()
     return $dbh;
 }
 
+// postデータ取得関数
+// ------------------------------
+
+function get_postData()
+{
+    // ユーザー入力情報を保持する配列を準備する
+    $user_input_data = [];
+    // パラメーターの一覧を把握
+    $params = [
+        "name",
+        "post",
+        "address",
+        "birthday_yy",
+        "birthday_mm",
+        "birthday_dd",
+    ];
+    // データを取得する
+    foreach ($params as $p) {
+        $user_input_data[$p] = (string) @$_POST[$p];
+    }
+    return $user_input_data;
+}
+
 // validation関数
 // ------------------------------
 // 必須チェック
@@ -132,7 +155,6 @@ function is_required($data)
             $error_detail["error_must_{$p}"] = true; // 名前未入力の場合のkey名はerror_must_nameとなる
         }
     }
-    // var_dump($error_detail);
     return $error_detail;
 }
 
@@ -166,4 +188,17 @@ function match_birthday($data)
         $error_detail["error_format_birthday"] = true;
     }
     return $error_detail;
+}
+
+// その他関数
+// ------------------------------
+// updateのvalue
+
+function v($post_data, $db_data, $key)
+{
+    if (isset($post_data[$key])) {
+        return $post_data[$key];
+    } else {
+        return $db_data[$key];
+    }
 }

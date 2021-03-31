@@ -11,22 +11,9 @@ session_start();
 // common_function.phpの読み込み
 require_once "common_function.php";
 
-// ユーザー入力情報を保持する配列を準備する
-$user_input_data = [];
+// postデータ取得
+$user_input_data = get_postData();
 
-// パラメーターの一覧を把握
-$params = [
-    "name",
-    "post",
-    "address",
-    "birthday_yy",
-    "birthday_mm",
-    "birthday_dd",
-];
-// データを取得する
-foreach ($params as $p) {
-    $user_input_data[$p] = (string) @$_POST[$p];
-}
 // 確認
 // var_dump($user_input_data);
 
@@ -36,7 +23,6 @@ foreach ($params as $p) {
 
 // 必須チェック
 $error_detail = is_required($user_input_data);
-
 // 型チェック
 // 郵便番号
 $error_detail += match_post($user_input_data);

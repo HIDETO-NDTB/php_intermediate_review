@@ -1,12 +1,27 @@
 <?php
 
+ob_start();
+session_start();
+
 require_once "./common_function.php";
 
-// postデータのvalidate(共通関数として切り分ける)
-// 未入力チェック
-// postとbirthdayの型チェック
+// ユーザー入力情報を保持する配列
+$user_input_data = get_postData();
 
-// エラーフラグがfalseなら・・
+$error_detail = []; // エラー詳細を入れる配列
+// 必須チェック
+$error_detail = is_required($user_input_data);
+// post,birthdayの型チェック
+$error_detail += match_post($user_input_data);
+$error_detail += match_birthday($user_input_data);
+// error_detailが空でなければ・・
+if (!empty($error_detail)) {
+    $_SESSION["output_buffer"] = $error_detail;
+    $_SESSION["output_buffer"] += $user_input_data;
+    $url = "./admin_data_update.php?test_form_id=" . rawurldecode($_POST["id"]);
+    header("Location:" . $url);
+    exit();
+}
 
 $dbh = get_dbh();
 $sql =
@@ -15,10 +30,11 @@ $sql =
 $pre = $dbh->prepare($sql);
 
 //bind
-$pre->bindValue(":name", $_POST["name"]);
-$pre->bindValue(":post", $_POST["post"]);
-$pre->bindValue(":address", $_POST["address"]);
-$pre->bindValue(":birthday", $_POST["birthday"]);
+$pre->bindValue(":name", $user_input_data["name"]);
+$pre->bindValue(":post", $user_input_data["post"]);
+$pre->bindValue(":address", $user_input_data["address"]);
+$birthday = "{$user_input_data["birthday_yy"]}-{$user_input_data["birthday_mm"]}-{$user_input_data["birthday_dd"]}";
+$pre->bindValue(":birthday", $birthday);
 $pre->bindValue(":updated", date("Y-m-d h:i:s"));
 $pre->bindValue(":id", $_POST["id"]);
 
