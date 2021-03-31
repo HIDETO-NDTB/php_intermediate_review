@@ -59,12 +59,15 @@ function create_csrf_token()
 // tokenのチェック
 function is_csrf_token()
 {
+    $error_detail = []; // エラー情報詳細を入れる配列
+
     // CSRFトークンを把握
     $post_csrf_token = (string) @$_POST["csrf_token"];
 
     // セッションの中に送られてきたトークンが存在しなければfalse
     if (isset($_SESSION["front"]["csrf_token"][$post_csrf_token]) === false) {
-        return false;
+        $error_detail["error_csrf"] = true;
+        return $error_detail;
     }
 
     // 寿命を把握
@@ -73,11 +76,12 @@ function is_csrf_token()
     unset($_SESSION["front"]["csrf_token"][$post_csrf_token]);
     // 寿命チェック（5分以内）
     if ($ttl + 300 <= time()) {
-        return false;
+        $error_detail["error_csrf"] = true;
+        return $error_detail;
     }
 
     // 全てのチェックOKだったのでtrueを返す
-    return true;
+    return $error_detail;
 }
 
 // DB用関数
@@ -106,4 +110,60 @@ function get_dbh()
         exit();
     }
     return $dbh;
+}
+
+// validation関数
+// ------------------------------
+// 必須チェック
+
+function is_required($data)
+{
+    $error_detail = []; // エラー情報詳細を入れる配列
+    $validate_params = [
+        "name",
+        "post",
+        "address",
+        "birthday_yy",
+        "birthday_mm",
+        "birthday_dd",
+    ];
+    foreach ($validate_params as $p) {
+        if ($data[$p] === "") {
+            $error_detail["error_must_{$p}"] = true; // 名前未入力の場合のkey名はerror_must_nameとなる
+        }
+    }
+    // var_dump($error_detail);
+    return $error_detail;
+}
+
+// post型チェック
+function match_post($data)
+{
+    $error_detail = []; // エラー情報詳細を入れる配列
+    if (preg_match("/\A[0-9]{3}[- ]?[0-9]{4}\z/", $data["post"]) !== 1) {
+        $error_detail["error_format_post"] = true;
+    }
+    return $error_detail;
+}
+
+// birthday型チェック
+function match_birthday($data)
+{
+    $error_detail = []; // エラー情報詳細を入れる配列
+    // postされた誕生日を文字列から数値に変換(checkdateを使う為)
+    $int_params = ["birthday_yy", "birthday_mm", "birthday_dd"];
+    foreach ($int_params as $p) {
+        $data[$p] = (int) $data[$p];
+    }
+    if (
+        // chackdate()は月日年の順
+        checkdate(
+            $data["birthday_mm"],
+            $data["birthday_dd"],
+            $data["birthday_yy"]
+        ) === false
+    ) {
+        $error_detail["error_format_birthday"] = true;
+    }
+    return $error_detail;
 }

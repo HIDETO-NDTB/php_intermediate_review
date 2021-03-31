@@ -33,62 +33,24 @@ foreach ($params as $p) {
 // ユーザー入力のvalidate
 // -------------------------------------
 //
-$error_flg = false;
-$error_detail = []; // エラー情報詳細を入れる配列
 
 // 必須チェック
-$validate_params = [
-    "name",
-    "post",
-    "address",
-    "birthday_yy",
-    "birthday_mm",
-    "birthday_dd",
-];
-foreach ($validate_params as $p) {
-    if ($user_input_data[$p] === "") {
-        $error_detail["error_must_{$p}"] = true; // 名前未入力の場合のkey名はerror_must_nameとなる
-        $error_flg = true;
-    }
-}
+$error_detail = is_required($user_input_data);
 
 // 型チェック
 // 郵便番号
-if (preg_match("/\A[0-9]{3}[- ]?[0-9]{4}\z/", $user_input_data["post"]) !== 1) {
-    $error_detail["error_format_post"] = true;
-    $error_flg = true;
-}
+$error_detail += match_post($user_input_data);
 // 誕生日
-// postされた誕生日を文字列から数値に変換
-$int_params = ["birthday_yy", "birthday_mm", "birthday_dd"];
-foreach ($int_params as $p) {
-    $user_input_data[$p] = (int) $user_input_data[$p];
-}
-if (
-    // chackdate()は月日年の順
-    checkdate(
-        $user_input_data["birthday_mm"],
-        $user_input_data["birthday_dd"],
-        $user_input_data["birthday_yy"]
-    ) === false
-) {
-    $error_detail["error_format_birthday"] = true;
-    $error_flg = true;
-}
-
-// 確認
-// var_dump($error_flg);
+$error_detail += match_birthday($user_input_data);
 
 // CSRFチェック
-if (is_csrf_token() === false) {
-    // CSRFエラーであることを配列に格納
-    $error_detail["error_csrf"] = true;
-    // エラーフラグを立てる
-    $error_flg = true;
-}
+$error_detail += is_csrf_token();
+
+// 確認
+// var_dump($error_detail);
 
 // エラーがある場合、入力ページに遷移する
-if ($error_flg === true) {
+if (!empty($error_detail)) {
     // エラー情報をセッションに入れる
     $_SESSION["output_buffer"] = $error_detail;
     // value保持の為に入力情報をセッションに入れる
@@ -135,6 +97,7 @@ if ($r === false) {
     <title>DB中級講座</title>
 </head>
 <body>
-    新規登録ありがとうございます！
+    <h3>新規登録ありがとうございます！</h3>
+    <a href="./admin_data_list.php"><button class="btn btn-default">戻る</button></a>
 </body>
 </html>
