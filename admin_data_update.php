@@ -4,6 +4,7 @@ ob_start();
 session_start();
 
 require_once "./common_function.php";
+require_once "./test_form_data.php";
 
 // セッションにエラー情報のフラグが入っていたら取り出す
 $view_data = [];
@@ -14,31 +15,16 @@ if (isset($_SESSION["output_buffer"]) === true) {
 // 二重に出力しないようにセッション内の情報を削除する
 unset($_SESSION["output_buffer"]);
 
+// getパラメータからidを取得
 $id = (string) @$_GET["test_form_id"];
+// echo $id; 確認
 if ($id === "") {
     header("Location: ./admin_data_list.php");
     exit();
 }
 
-$dbh = get_dbh();
-$sql = "SELECT * from test_form WHERE test_form_id = :test_form_id";
-
-$pre = $dbh->prepare($sql);
-
-// bind
-$pre->bindValue(":test_form_id", $id, PDO::PARAM_INT);
-
-$r = $pre->execute();
-if ($r === false) {
-    echo "修正用のデータ取得にエラーがありました";
-    exit();
-}
-
-$data = $pre->fetch(PDO::FETCH_ASSOC);
-if (empty($data)) {
-    header("Location: ./admin_data_list.php");
-    exit();
-}
+// idから１件データを取得する
+$data = get_db_data($id);
 
 // 誕生日を年月日に分ける
 $birthday_yy = date("Y", strtotime($data["birthday"]));
@@ -155,6 +141,7 @@ $birthday_dd = date("d", strtotime($data["birthday"]));
       $_GET["test_form_id"]
   ); ?>">
   <button type="submit" class="btn btn-default">修正</button>
+  <a href="./admin_data_list.php"><button type="button" class="btn btn-default">戻る</button></a>
   </form>
   </div>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

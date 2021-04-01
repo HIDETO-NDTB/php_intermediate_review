@@ -7,7 +7,9 @@
 ob_start();
 
 require_once "common_function.php";
+require_once "./test_form_data.php";
 
+// getパラメータからidを取得
 $id = (string) @$_GET["test_form_id"];
 // echo $id; 確認
 if ($id === "") {
@@ -15,26 +17,8 @@ if ($id === "") {
     exit();
 }
 
-$dbh = get_dbh();
-$sql = "SELECT * FROM test_form WHERE test_form_id = :test_form_id";
-
-$pre = $dbh->prepare($sql);
-
-// bind
-$pre->bindValue(":test_form_id", $id, PDO::PARAM_INT);
-
-$r = $pre->execute();
-if ($r === false) {
-    echo "formデータの取得に失敗しました";
-    exit();
-}
-
-$data = $pre->fetch(PDO::FETCH_ASSOC);
-
-if (empty($data)) {
-    header("Location: ./admin_data_list.php");
-    exit();
-}
+// idから１件データを取得する
+$data = get_db_data($id);
 
 // 確認
 // var_dump($data);
