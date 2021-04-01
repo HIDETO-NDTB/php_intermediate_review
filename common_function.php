@@ -18,7 +18,7 @@ function h_digit($d)
 // CSRF共通関数
 // ------------------------------
 // tokenの作成とセッションへの設定
-function create_csrf_token()
+function create_csrf_token($type)
 {
     // CSRF用のtokenの作成と設定
     $csrf_token = "";
@@ -44,20 +44,20 @@ function create_csrf_token()
     }
 
     // CSRFトークンは5個まで
-    if (isset($_SESSION["front"]["csrf_token"])) {
-        while (count(@$_SESSION["front"]["csrf_token"]) >= 5) {
-            array_shift($_SESSION["front"]["csrf_token"]);
+    if (isset($_SESSION[$type]["csrf_token"])) {
+        while (count(@$_SESSION[$type]["csrf_token"]) >= 5) {
+            array_shift($_SESSION[$type]["csrf_token"]);
         }
     }
 
     // セッションに格納
-    $_SESSION["front"]["csrf_token"][$csrf_token] = time();
+    $_SESSION[$type]["csrf_token"][$csrf_token] = time();
 
     return $csrf_token;
 }
 
 // tokenのチェック
-function is_csrf_token()
+function is_csrf_token($type)
 {
     $error_detail = []; // エラー情報詳細を入れる配列
 
@@ -65,15 +65,15 @@ function is_csrf_token()
     $post_csrf_token = (string) @$_POST["csrf_token"];
 
     // セッションの中に送られてきたトークンが存在しなければfalse
-    if (isset($_SESSION["front"]["csrf_token"][$post_csrf_token]) === false) {
+    if (isset($_SESSION[$type]["csrf_token"][$post_csrf_token]) === false) {
         $error_detail["error_csrf"] = true;
         return $error_detail;
     }
 
     // 寿命を把握
-    $ttl = $_SESSION["front"]["csrf_token"][$post_csrf_token];
+    $ttl = $_SESSION[$type]["csrf_token"][$post_csrf_token];
     // 先にトークンは削除
-    unset($_SESSION["front"]["csrf_token"][$post_csrf_token]);
+    unset($_SESSION[$type]["csrf_token"][$post_csrf_token]);
     // 寿命チェック（5分以内）
     if ($ttl + 300 <= time()) {
         $error_detail["error_csrf"] = true;

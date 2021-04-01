@@ -30,7 +30,7 @@ $error_detail += match_post($user_input_data);
 $error_detail += match_birthday($user_input_data);
 
 // CSRFチェック
-$error_detail += is_csrf_token();
+$error_detail += is_csrf_token("front");
 
 // 確認
 // var_dump($error_detail);

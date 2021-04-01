@@ -15,6 +15,9 @@ if (isset($_SESSION["output_buffer"]) === true) {
 // 二重に出力しないようにセッション内の情報を削除する
 unset($_SESSION["output_buffer"]);
 
+// CSRFトークンの取得
+$csrf_token = create_csrf_token("admin");
+
 // getパラメータからidを取得
 $id = (string) @$_GET["test_form_id"];
 // echo $id; 確認
@@ -48,6 +51,12 @@ $birthday_dd = date("d", strtotime($data["birthday"]));
   </style>
 </head>
 <body>
+<?php if (
+    isset($error_detail["error_csrf"]) &&
+    $error_detail["error_csrf"] === true
+): ?>
+  <span class="error">CSRFトークンでエラーが起きました。正しい遷移を5分以内に操作して下さい。</span>
+<?php endif; ?>
 <div class="container">
   <h4>フォーム修正画面</h4>
   <form action="./admin_data_update_fin.php" method="POST">
@@ -140,6 +149,7 @@ $birthday_dd = date("d", strtotime($data["birthday"]));
   <input type="hidden" name="id" value="<?php echo h(
       $_GET["test_form_id"]
   ); ?>">
+  <input type="hidden" name="csrf_token" value="<?php echo h($csrf_token); ?>">
   <button type="submit" class="btn btn-default">修正</button>
   <a href="./admin_data_list.php"><button type="button" class="btn btn-default">戻る</button></a>
   </form>

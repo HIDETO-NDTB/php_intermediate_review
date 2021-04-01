@@ -14,6 +14,9 @@ $error_detail = is_required($user_input_data);
 // post,birthdayの型チェック
 $error_detail += match_post($user_input_data);
 $error_detail += match_birthday($user_input_data);
+// CSRFチェック
+$error_detail += is_csrf_token("admin");
+
 // error_detailが空でなければ・・
 if (!empty($error_detail)) {
     $_SESSION["output_buffer"] = $error_detail;

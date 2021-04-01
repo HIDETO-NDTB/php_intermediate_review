@@ -18,7 +18,7 @@ if (isset($_SESSION["output_buffer"]) === true) {
 unset($_SESSION["output_buffer"]);
 
 // CSRFトークンの取得
-$csrf_token = create_csrf_token();
+$csrf_token = create_csrf_token("front");
 ?>
 
 <!DOCTYPE html>
